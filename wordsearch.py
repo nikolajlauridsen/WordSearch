@@ -2,6 +2,7 @@ import requests
 import bs4
 import re
 import os
+import argparse
 
 
 def parse_site(url, selection):
@@ -40,33 +41,37 @@ def search_google(query):
     return hits
 
 
-def print_paragraphs(paragraphs):
-    for paragraph in paragraphs:
+def print_paragraphs(paragraphs, source):
+    for page, paragraph in enumerate(paragraphs):
         if len(paragraph) > 10:
             try:
                 os.system('cls')
-                print(paragraph)
+                print('{}\n\nSource: {}\nPage: {}/{}'.format(paragraph,
+                                                             source, page+1,
+                                                             len(paragraphs)))
             except UnicodeEncodeError:
                 continue
-            u_input = input('print next?: ')
+            u_input = input('print next? y/n: ')
             if u_input == 'n':
                 return False
         else:
             continue
     return True
 
+parser = argparse.ArgumentParser()
+parser.add_argument("query", help="Word you need defined")
+args = parser.parse_args()
 
-query = input('Query: ')
-
-links = search_google(query)
+links = search_google(args.query)
 
 cont = True
 for link in links:
-    if get_domain(link) == 'ordnet.dk' and cont:
+    source = get_domain(link)
+    if source == 'ordnet.dk' and cont:
         paragraphs = parse_site(link, '.definition')
-        cont = print_paragraphs(paragraphs)
+        cont = print_paragraphs(paragraphs, source)
 
-    elif (get_domain(link) == 'da.wikipedia.org' or get_domain(link) == 'en.wikipedia.org') and cont:
+    elif (source == 'da.wikipedia.org' or source == 'en.wikipedia.org') and cont:
         paragraphs = parse_site(link, "#mw-content-text p")
-        cont = print_paragraphs(paragraphs)
+        cont = print_paragraphs(paragraphs, source)
 
