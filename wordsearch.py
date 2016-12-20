@@ -58,8 +58,6 @@ def print_paragraphs(paragraphs):
 
 query = input('Query: ')
 
-WHITELIST = ['ordnet.dk', 'da.wikipedia.org', 'en.wikipedia.org']
-
 links = search_google(query)
 
 cont = True
