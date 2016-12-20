@@ -1,2 +1,2 @@
 # What does that word mean?
-Look up words, much work in process, very alpha
+Commandline tool for looking up words, this is very much a work in progress
