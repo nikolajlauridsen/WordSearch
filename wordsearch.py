@@ -1,29 +1,11 @@
 import requests
 import bs4
 import re
+import os
 
 
-def parse_ordnet(link):
-    res = requests.get('http://www.' + link)
-    ordnet = bs4.BeautifulSoup(res.text, 'html.parser')
-    definition = ordnet.select('.definition')
-    try: 
-        print(definition.text)
-    except AttributeError:
-        print(definition[0].text)
-
-
-def parse_wiki(link):
-    #print('https://' + link)
-    res = requests.get('https://' + link)
-    print(res.url)
-    wiki = bs4.BeautifulSoup(res.text, 'html.parser')
-    content = wiki.select('#mw-content-text p')
-    print('{}\n{}'.format(content[0].text, content[1].text))
-
-
-def parse_site(link, selection):
-    res = requests.get('http://' + link)
+def parse_site(url, selection):
+    res = requests.get('http://' + url)
     site = bs4.BeautifulSoup(res.text, 'html.parser')
     content = site.select(selection)
     elements = []
@@ -43,31 +25,50 @@ def clean_link(link):
     return link
 
 
-#Replace with config object
-WHITELIST = ['ordnet.dk', 'da.wikipedia.org', 'en.wikipedia.org', 'sproget.dk', 'denstoredanske.dk']
+def get_domain(link):
+    return link.split('/')[0]
+
+
+def search_google(query):
+    payload = {'q': query}
+    res = requests.get('https://www.google.dk/search?', params=payload)
+    soup = bs4.BeautifulSoup(res.text, 'html.parser')
+    results = soup.select('cite')
+    hits = []
+    for hit in results:
+        hits.append(clean_link(hit.text))
+    return hits
+
+
+def print_paragraphs(paragraphs):
+    for paragraph in paragraphs:
+        if len(paragraph) > 10:
+            try:
+                os.system('cls')
+                print(paragraph)
+            except UnicodeEncodeError:
+                continue
+            u_input = input('print next?: ')
+            if u_input == 'n':
+                return False
+        else:
+            continue
+    return True
+
 
 query = input('Query: ')
-payload = {'q':query}
-res = requests.get('https://www.google.dk/search?', params=payload)
-# print('Status code: ' + str(res.status_code))
 
-soup = bs4.BeautifulSoup(res.text, 'html.parser')
+WHITELIST = ['ordnet.dk', 'da.wikipedia.org', 'en.wikipedia.org']
 
-links = soup.select('cite')
+links = search_google(query)
 
-for ele in links:
-    link = clean_link(ele.text)
-    domain = link.split('/')[0]
-    # if domain in WHITELIST: print('{}\n{}\n'.format(link, domain))
-    if domain == 'ordnet.dk':
+cont = True
+for link in links:
+    if get_domain(link) == 'ordnet.dk' and cont:
         paragraphs = parse_site(link, '.definition')
-        print(paragraphs)
-    elif domain == 'da.wikipedia.org':
+        cont = print_paragraphs(paragraphs)
+
+    elif (get_domain(link) == 'da.wikipedia.org' or get_domain(link) == 'en.wikipedia.org') and cont:
         paragraphs = parse_site(link, "#mw-content-text p")
-        print(paragraphs)
-
-print('Elements: ' + str(len(links)))
-print(str(res.request.url))
-
-
+        cont = print_paragraphs(paragraphs)
 
