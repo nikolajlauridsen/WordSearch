@@ -54,13 +54,19 @@ def print_paragraphs(paragraphs, source):
             u_input = input('print next? y/n: ')
             if u_input == 'n':
                 return False
+            if u_input == 'b':
+                return True
         else:
             continue
     return True
 
-parser = argparse.ArgumentParser()
-parser.add_argument("query", help="Word you need defined")
-args = parser.parse_args()
+
+def a_parse():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("query", help="Word you need defined")
+    return parser.parse_args()
+
+args = a_parse()
 
 links = search_google(args.query)
 
@@ -70,7 +76,9 @@ for link in links:
     if source == 'ordnet.dk' and cont:
         paragraphs = parse_site(link, '.definition')
         cont = print_paragraphs(paragraphs, source)
-
+    elif source == 'merriam-webster.com' and cont:
+        paragraphs = parse_site(link, '.definition-list p')
+        cont = print_paragraphs(paragraphs, source)
     elif (source == 'da.wikipedia.org' or source == 'en.wikipedia.org') and cont:
         paragraphs = parse_site(link, "#mw-content-text p")
         cont = print_paragraphs(paragraphs, source)
