@@ -6,6 +6,8 @@ import argparse
 
 
 def parse_site(url, selection):
+    """Request site, select elements define by selection and return it/them
+    as a list"""
     res = requests.get('http://' + url)
     site = bs4.BeautifulSoup(res.text, 'html.parser')
     content = site.select(selection)
@@ -19,6 +21,8 @@ def parse_site(url, selection):
 
 
 def clean_link(link):
+    """Normalize link, this is needed since some link has http, or www.
+    and others doesn't"""
     if link.startswith('http') or link.startswith('https'):
         link = re.sub(r'http[s]?\://', '', link)
     if link.startswith('www.'):
@@ -27,10 +31,13 @@ def clean_link(link):
 
 
 def get_domain(link):
+    """Short hand for splitting a cleaned link and returning the domaen
+    ie. en.wikipedia.org"""
     return link.split('/')[0]
 
 
 def search_google(query):
+    """Search google, parse the html and return all result links as a list"""
     payload = {'q': query}
     res = requests.get('https://www.google.dk/search?', params=payload)
     soup = bs4.BeautifulSoup(res.text, 'html.parser')
@@ -42,6 +49,9 @@ def search_google(query):
 
 
 def print_paragraphs(paragraphs, source):
+    """Enumarte over a list of paragraphs(strings) pausing after each paragraph
+    is displayed, returns true/false determining whether the next source
+    should be displayed if any"""
     for page, paragraph in enumerate(paragraphs):
         if len(paragraph) > 10:
             try:
@@ -62,6 +72,7 @@ def print_paragraphs(paragraphs, source):
 
 
 def a_parse():
+    """Parse commandline arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("query", help="Word you need defined")
     return parser.parse_args()
