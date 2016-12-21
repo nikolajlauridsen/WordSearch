@@ -3,6 +3,7 @@ import bs4
 import re
 import os
 import argparse
+import configparser
 
 
 def parse_site(url, selection):
@@ -40,6 +41,7 @@ def search_google(query):
     """Search google, parse the html and return all result links as a list"""
     payload = {'q': query}
     res = requests.get('https://www.google.dk/search?', params=payload)
+
     soup = bs4.BeautifulSoup(res.text, 'html.parser')
     results = soup.select('cite')
     hits = []
@@ -49,17 +51,20 @@ def search_google(query):
 
 
 def print_paragraphs(paragraphs, source):
-    """Enumarte over a list of paragraphs(strings) pausing after each paragraph
-    is displayed, returns true/false determining whether the next source
-    should be displayed if any"""
+    """Iterate over a list of paragraphs(strings) pausing after
+    each paragraph has been displayed, returns true/false determining whether
+    the next source should be displayed if any"""
     for page, paragraph in enumerate(paragraphs):
-        if len(paragraph) > 10:
+        if len(paragraph) > 10:  # Skip overly short paragraphs
             try:
                 os.system('cls')
                 print('{}\n\nSource: {}\nPage: {}/{}'.format(paragraph,
                                                              source, page+1,
                                                              len(paragraphs)))
             except UnicodeEncodeError:
+                # sometimes the encoding isn't as we'd like, this can be
+                # circumvented with .encode('utf-8') but the output is rarely
+                # pretty, so we'll skip it instead, relying on multiple sources
                 continue
             u_input = input('print next? y/n: ')
             if u_input == 'n':
@@ -77,20 +82,33 @@ def a_parse():
     parser.add_argument("query", help="Word you need defined")
     return parser.parse_args()
 
+
+def parse_hits(hits, config):
+    """Parse a list of links returning all those with a known selector as a
+    dictionary with url, css selector, domain"""
+    valid_hits = []
+    for hit in hits:
+        domain = get_domain(hit)
+        if domain in config:
+            context = {"url": hit,
+                       "selector": config[domain]["selector"],
+                       "domain": domain}
+            valid_hits.append(context)
+    return valid_hits
+
+
+config = configparser.ConfigParser()
+config.read('config.ini')
 args = a_parse()
 
 links = search_google(args.query)
+links = parse_hits(links, config)
+
 
 cont = True
 for link in links:
-    source = get_domain(link)
-    if source == 'ordnet.dk' and cont:
-        paragraphs = parse_site(link, '.definition')
-        cont = print_paragraphs(paragraphs, source)
-    elif source == 'merriam-webster.com' and cont:
-        paragraphs = parse_site(link, '.definition-list p')
-        cont = print_paragraphs(paragraphs, source)
-    elif (source == 'da.wikipedia.org' or source == 'en.wikipedia.org') and cont:
-        paragraphs = parse_site(link, "#mw-content-text p")
-        cont = print_paragraphs(paragraphs, source)
-
+    if cont:
+        paragraphs = parse_site(link["url"], link["selector"])
+        cont = print_paragraphs(paragraphs, link["domain"])
+    else:
+        break
