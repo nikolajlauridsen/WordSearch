@@ -4,6 +4,7 @@ import re
 import os
 import argparse
 import configparser
+import sys
 
 
 def parse_site(url, selection):
@@ -104,6 +105,8 @@ args = a_parse()
 links = search_google(args.query)
 links = parse_hits(links, config)
 
+if len(links) < 1:
+    sys.exit('No definition found')
 
 cont = True
 for link in links:
