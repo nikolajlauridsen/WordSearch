@@ -60,16 +60,16 @@ def search_google(query):
     return hits
 
 
-def print_paragraphs(paragraphs, source, n, n_sources):
-    """Iterate over a list of paragraphs(strings) pausing after
+def print_pages(pages, source, n, n_sources):
+    """Iterate over a list of pages(strings) pausing after
     each paragraph has been displayed, returns true/false determining whether
     the next source should be displayed if any"""
-    for page, paragraph in enumerate(paragraphs):
-        if len(paragraph) > 10:  # Skip overly short paragraphs
+    for page_n, page in enumerate(pages):
+        if len(page) > 10:  # Skip overly short pages
             try:
                 os.system('cls')
-                print('{}\n'.format(paragraph))
-                print('Page: {}/{}'.format(page + 1, len(paragraphs)))
+                print('{}\n'.format(page))
+                print('Page: {}/{}'.format(page_n + 1, len(pages)))
                 print('Source {}/{}: {}'.format(n, n_sources, source))
             except UnicodeEncodeError:
                 # sometimes the encoding isn't as we'd like, this can be
@@ -112,8 +112,8 @@ config.read('config.ini')
 args = a_parse()
 
 print('Googling that for you...')
-links = search_google(args.query)
-links = parse_hits(links, config)
+links = search_google(args.query)  # Search google and extract result links
+links = parse_hits(links, config)  # Sort out all domains not in config.ini
 
 if len(links) < 1:
     sys.exit('No definition found')
@@ -122,8 +122,11 @@ cont = True
 for n, source in enumerate(links):
     if cont:
         print('Looking up source...')
-        paragraphs = parse_site(source["url"], source["selector"])
-        if len(paragraphs) > 0:
-            cont = print_paragraphs(paragraphs, source["domain"], n+1, len(links))
+        # Request site and extract word definiton from it using the selector
+        # in config.ini, one definition element is a pages
+        pages = parse_site(source["url"], source["selector"])
+        if len(pages) > 0:
+            # If any definition was found enter the print pages loop
+            cont = print_pages(pages, source["domain"], n + 1, len(links))
     else:
         break
