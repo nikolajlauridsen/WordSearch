@@ -23,7 +23,7 @@ def parse_site(url, selection):
 
 
 def clean_link(link):
-    """Normalize link, this is needed since some link has http, or www.
+    """Normalize source, this is needed since some source has http, or www.
     and others doesn't"""
     if link.startswith('http') or link.startswith('https'):
         link = re.sub(r'http[s]?\://', '', link)
@@ -33,7 +33,7 @@ def clean_link(link):
 
 
 def get_domain(link):
-    """Short hand for splitting a cleaned link and returning the domaen
+    """Short hand for splitting a cleaned source and returning the domaen
     ie. en.wikipedia.org"""
     return link.split('/')[0]
 
@@ -51,7 +51,7 @@ def search_google(query):
     return hits
 
 
-def print_paragraphs(paragraphs, source):
+def print_paragraphs(paragraphs, source, n, n_sources):
     """Iterate over a list of paragraphs(strings) pausing after
     each paragraph has been displayed, returns true/false determining whether
     the next source should be displayed if any"""
@@ -59,18 +59,18 @@ def print_paragraphs(paragraphs, source):
         if len(paragraph) > 10:  # Skip overly short paragraphs
             try:
                 os.system('cls')
-                print('{}\n\nSource: {}\nPage: {}/{}'.format(paragraph,
-                                                             source, page+1,
-                                                             len(paragraphs)))
+                print('{}\n'.format(paragraph))
+                print('Page: {}/{}'.format(page + 1, len(paragraphs)))
+                print('Source {}/{}: {}'.format(n, n_sources, source))
             except UnicodeEncodeError:
                 # sometimes the encoding isn't as we'd like, this can be
                 # circumvented with .encode('utf-8') but the output is rarely
                 # pretty, so we'll skip it instead, relying on multiple sources
                 continue
-            u_input = input('print next? y/n: ')
-            if u_input == 'n':
+            u_input = input('\ne: end script | n: next source\n:> ')
+            if u_input.lower() == 'e':
                 return False
-            if u_input == 'b':
+            if u_input.lower() == 'n':
                 return True
         else:
             continue
@@ -109,9 +109,9 @@ if len(links) < 1:
     sys.exit('No definition found')
 
 cont = True
-for link in links:
+for n, source in enumerate(links):
     if cont:
-        paragraphs = parse_site(link["url"], link["selector"])
-        cont = print_paragraphs(paragraphs, link["domain"])
+        paragraphs = parse_site(source["url"], source["selector"])
+        cont = print_paragraphs(paragraphs, source["domain"], n+1, len(links))
     else:
         break
