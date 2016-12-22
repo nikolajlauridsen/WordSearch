@@ -24,8 +24,9 @@ for your answer
 * da.wikipedia.org
 * sproget.dk
 
+(Language sort function will be added)
 ## Requirements
-You cann install requirements with pip
+You can install requirements with pip
 ```
 py -m pip install -r requirements.txt
 ```
