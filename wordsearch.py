@@ -26,9 +26,9 @@ def clean_link(link):
     """Normalize source, this is needed since some source has http, or www.
     and others doesn't"""
     if link.startswith('http') or link.startswith('https'):
-        link = re.sub(r'http[s]?\://', '', link)
+        link = re.sub(r'http[s]?://', '', link)
     if link.startswith('www.'):
-        link = re.sub(r'www.', '', link)
+        link = re.sub(r'www\.', '', link)
     return link
 
 
