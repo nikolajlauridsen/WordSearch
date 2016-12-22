@@ -10,7 +10,12 @@ import sys
 def parse_site(url, selection):
     """Request site, select elements define by selection and return it/them
     as a list"""
-    res = requests.get('http://' + url)
+    try:
+        res = requests.get('http://' + url)
+        res.raise_for_status()
+    except:
+        print('Can\'t connect to source')
+        return []
     site = bs4.BeautifulSoup(res.text, 'html.parser')
     content = site.select(selection)
     elements = []
@@ -41,7 +46,11 @@ def get_domain(link):
 def search_google(query):
     """Search google, parse the html and return all result links as a list"""
     payload = {'q': query}
-    res = requests.get('https://www.google.dk/search?', params=payload)
+    try:
+        res = requests.get('https://www.google.dk/search?', params=payload)
+        res.raise_for_status()
+    except:
+        sys.exit('Google not responding, check your internet')
 
     soup = bs4.BeautifulSoup(res.text, 'html.parser')
     results = soup.select('cite')
@@ -102,6 +111,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 args = a_parse()
 
+print('Googling that for you...')
 links = search_google(args.query)
 links = parse_hits(links, config)
 
@@ -111,7 +121,9 @@ if len(links) < 1:
 cont = True
 for n, source in enumerate(links):
     if cont:
+        print('Looking up source...')
         paragraphs = parse_site(source["url"], source["selector"])
-        cont = print_paragraphs(paragraphs, source["domain"], n+1, len(links))
+        if len(paragraphs) > 0:
+            cont = print_paragraphs(paragraphs, source["domain"], n+1, len(links))
     else:
         break
