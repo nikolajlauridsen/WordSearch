@@ -12,17 +12,17 @@ for your answer
 
 ## Supported sites
 ### English
-* en.wikipedia.org
-* merriam-webster.com
-* dictionary.com
-* thefreedictionary.com
-* vocabulary.com
+* [en.wikipedia.org](https://en.wikipedia.org/wiki/Main_Page)
+* [merriam-webster.com](https://www.merriam-webster.com/)
+* [dictionary.com](http://www.dictionary.com/)
+* [thefreedictionary.com](http://www.thefreedictionary.com/)
+* [vocabulary.com](https://www.vocabulary.com/)
 
 
 ### Danish
-* ordnet.dk
-* da.wikipedia.org
-* sproget.dk
+* [ordnet.dk](http://ordnet.dk/)
+* [da.wikipedia.org](https://da.wikipedia.org/wiki/Forside)
+* [sproget.dk](http://sproget.dk/)
 
 (Language sort function will be added)
 ## Requirements
