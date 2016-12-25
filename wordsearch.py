@@ -120,13 +120,17 @@ if len(links) < 1:
 
 cont = True
 for n, source in enumerate(links):
-    if cont:
-        print('Looking up source...')
-        # Request site and extract word definiton from it using the selector
-        # in config.ini, one definition element is a pages
-        pages = parse_site(source["url"], source["selector"])
-        if len(pages) > 0:
-            # If any definition was found enter the print pages loop
-            cont = print_pages(pages, source["domain"], n + 1, len(links))
+    if config[source["domain"]]["lang"] == config["DEFAULT"]["lang"] \
+            or config["DEFAULT"]["lang"] == "all":
+        if cont:
+            print('Looking up source...')
+            # Request site and extract word definiton from it using the selector
+            # in config.ini, one definition element is a pages
+            pages = parse_site(source["url"], source["selector"])
+            if len(pages) > 0:
+                # If any definition was found enter the print pages loop
+                cont = print_pages(pages, source["domain"], n + 1, len(links))
+        else:
+            break
     else:
-        break
+        continue
