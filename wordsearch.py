@@ -108,7 +108,7 @@ def parse_hits(hits, config):
 
 
 config = configparser.ConfigParser()
-config.read('D:\Github\WordSearcher\config.ini')
+config.read('config.ini')
 args = a_parse()
 
 print('Googling that for you...')

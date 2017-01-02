@@ -29,7 +29,7 @@ To only show english results edit line 3 in config.ini to change language sortin
 
 #### before:
 
-```
+```INI
 [DEFAULT]
 selector = p
 lang = all
@@ -37,7 +37,7 @@ lang = all
 
 #### after:
 
-```
+```INI
 [DEFAULT]
 selector = p
 lang = en
