@@ -45,7 +45,7 @@ def get_domain(link):
 
 def search_google(query):
     """Search google, parse the html and return all result links as a list"""
-    payload = {'q': query}
+    payload = {'q': query, 'num':'25'}
     try:
         res = requests.get('https://www.google.dk/search?', params=payload)
         res.raise_for_status()
@@ -108,7 +108,7 @@ def parse_hits(hits, config):
 
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('D:\Github\WordSearcher\config.ini')
 args = a_parse()
 
 print('Googling that for you...')
@@ -124,8 +124,8 @@ for n, source in enumerate(links):
             or config["DEFAULT"]["lang"] == "all":
         if cont:
             print('Looking up source...')
-            # Request site and extract word definiton from it using the selector
-            # in config.ini, one definition element is a pages
+            # Request site and extract word definiton from it using
+            # the selector in config.ini, one definition element is a pages
             pages = parse_site(source["url"], source["selector"])
             if len(pages) > 0:
                 # If any definition was found enter the print pages loop

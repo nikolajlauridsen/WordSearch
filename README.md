@@ -24,7 +24,25 @@ for your answer
 * [da.wikipedia.org](https://da.wikipedia.org/wiki/Forside)
 * [sproget.dk](http://sproget.dk/)
 
-(Language sort function will be added)
+### Sorting languages
+To only show english results edit line 3 in config.ini to change language sorting like so:
+
+#### before:
+
+```
+[DEFAULT]
+selector = p
+lang = all
+```
+
+#### after:
+
+```
+[DEFAULT]
+selector = p
+lang = en
+```
+
 ## Requirements
 You can install requirements with pip
 ```
