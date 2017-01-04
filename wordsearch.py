@@ -60,6 +60,14 @@ def search_google(query):
     return hits
 
 
+def clear_screen():
+    """Clears the commandline window"""
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')
+
+
 def print_pages(pages, source, n, n_sources):
     """Iterate over a list of pages(strings) pausing after
     each paragraph has been displayed, returns true/false determining whether
@@ -67,7 +75,7 @@ def print_pages(pages, source, n, n_sources):
     for page_n, page in enumerate(pages):
         if len(page) > 10:  # Skip overly short pages
             try:
-                os.system('cls')
+                clear_screen()
                 print('{}\n'.format(page))
                 print('Page: {}/{}'.format(page_n + 1, len(pages)))
                 print('Source {}/{}: {}'.format(n, n_sources, source))
