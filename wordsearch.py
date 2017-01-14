@@ -72,25 +72,37 @@ def print_pages(pages, source, n, n_sources):
     """Iterate over a list of pages(strings) pausing after
     each paragraph has been displayed, returns true/false determining whether
     the next source should be displayed if any"""
-    for page_n, page in enumerate(pages):
-        if len(page) > 10:  # Skip overly short pages
+    page_n = 0
+    while page_n < len(pages):
+        if len(pages[page_n]) > 10:  # Skip overly short pages
             try:
                 clear_screen()
-                print('{}\n'.format(page))
+                print('{}\n'.format(pages[page_n]))
                 print('Page: {}/{}'.format(page_n + 1, len(pages)))
                 print('Source {}/{}: {}'.format(n, n_sources, source))
             except UnicodeEncodeError:
                 # sometimes the encoding isn't as we'd like, this can be
                 # circumvented with .encode('utf-8') but the output is rarely
                 # pretty, so we'll skip it instead, relying on multiple sources
+                page_n += 1
                 continue
-            u_input = input('\ne: end script | n: next source\n:> ')
+            u_input = input('\ne: end script | n: next source | b: back\n:> ')
             if u_input.lower() == 'e':
                 return False
             if u_input.lower() == 'n':
                 return True
+            elif u_input.lower() == 'b':
+                if page_n > 0:
+                    page_n -= 1
+                else:
+                    page_n = 0
+            else:
+                if page_n < len(pages)-1:
+                    page_n += 1
+                else:
+                    return True
         else:
-            continue
+            page_n += 1
     return True
 
 
@@ -116,7 +128,7 @@ def parse_hits(hits, config):
 
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('D:\Github\WordSearcher\config.ini')
 args = a_parse()
 
 print('Googling that for you...')
@@ -138,6 +150,8 @@ for n, source in enumerate(links):
             if len(pages) > 0:
                 # If any definition was found enter the print pages loop
                 cont = print_pages(pages, source["domain"], n + 1, len(links))
+            else:
+                continue
         else:
             break
     else:
