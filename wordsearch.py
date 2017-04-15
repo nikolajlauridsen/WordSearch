@@ -16,14 +16,14 @@ def parse_site(url, selection):
     except:
         print('Can\'t connect to source')
         return []
+
     site = bs4.BeautifulSoup(res.text, 'html.parser')
     content = site.select(selection)
-    elements = []
+
     if type(content) == list:
-        for item in content:
-            elements.append(item.text)
+        elements = [item.text for item in content]
     else:
-        elements.append(content.text)
+        elements = [content.text]
     return elements
 
 
@@ -54,9 +54,7 @@ def search_google(query):
 
     soup = bs4.BeautifulSoup(res.text, 'html.parser')
     results = soup.select('cite')
-    hits = []
-    for hit in results:
-        hits.append(clean_link(hit.text))
+    hits = [clean_link(hit.text) for hit in results]
     return hits
 
 
