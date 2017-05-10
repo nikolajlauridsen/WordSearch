@@ -43,9 +43,14 @@ def get_domain(link):
     return link.split('/')[0]
 
 
-def search_google(query):
+def search_google(args):
     """Search google, parse the html and return all result links as a list"""
-    payload = {'q': query, 'num':'25'}
+    if args.synonym:
+        query = args.query + " synonyms"
+    else:
+        query = "define " + args.query
+
+    payload = {'q': query, 'num': '25'}
     try:
         res = requests.get('https://www.google.dk/search?', params=payload)
         res.raise_for_status()
@@ -155,7 +160,7 @@ def main():
     args = a_parse()
 
     print('Googling that for you...')
-    links = search_google(args.query)  # Search google and extract result links
+    links = search_google(args)  # Search google and extract result links
     # Sort out all domains not in config.ini
     links = parse_hits(links, config, synonym=args.synonym)
 
