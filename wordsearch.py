@@ -116,12 +116,14 @@ def print_pages(pages, source, n, n_sources):
     return True
 
 
-def print_list(list, source, word):
+def print_list(list, source, word, place, total):
     clear_screen()
     print("Synonyms for " + word)
-    print("Source: " + source)
+    print("Source {}/{}: {}".format(place, total, source))
     for item in list:
         print("- " + item)
+    input("Create menu here")
+    return True
 
 
 def a_parse():
@@ -150,7 +152,6 @@ def parse_hits(hits, config, synonym=False):
                            "selector": config[domain]["selector"],
                            "domain": domain}
                 valid_hits.append(context)
-    print("Valid hits: ", valid_hits)
     return valid_hits
 
 
@@ -177,7 +178,7 @@ def main():
                 # the selector in config.ini, one definition element is a pages
                 pages = parse_site(source["url"], source["selector"])
                 if len(pages) > 0 and args.synonym:
-                    print_list(pages, source["domain"], args.query)
+                    cont = print_list(pages, source["domain"], args.query, n+1, len(links))
                 elif len(pages) > 0 and not args.synonym:
                     # If any definition was found enter the print pages loop
                     cont = print_pages(pages, source["domain"], n + 1, len(links))
