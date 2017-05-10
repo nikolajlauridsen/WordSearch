@@ -107,15 +107,24 @@ def print_pages(pages, source, n, n_sources):
                     return True
         else:
             page_n += 1
+    print(pages)
     return True
+
+
+def print_list(list, source, word):
+    clear_screen()
+    print("Synonyms for " + word)
+    print("Source: " + source)
+    for item in list:
+        print("- " + item)
 
 
 def a_parse():
     """Parse commandline arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("query", help="Word you need defined")
-    parser.add_argument("-s", "--synonym", help="Look up synonyms",
-                        default=False)
+    parser.add_argument("--synonym", "-s", help="Look up synonyms",
+                        action="store_true", default=False)
     return parser.parse_args()
 
 
@@ -147,7 +156,8 @@ def main():
 
     print('Googling that for you...')
     links = search_google(args.query)  # Search google and extract result links
-    links = parse_hits(links, config)  # Sort out all domains not in config.ini
+    # Sort out all domains not in config.ini
+    links = parse_hits(links, config, synonym=args.synonym)
 
     if len(links) < 1:
         sys.exit('No definition found')
@@ -161,7 +171,9 @@ def main():
                 # Request site and extract word definiton from it using
                 # the selector in config.ini, one definition element is a pages
                 pages = parse_site(source["url"], source["selector"])
-                if len(pages) > 0:
+                if len(pages) > 0 and args.synonym:
+                    print_list(pages, source["domain"], args.query)
+                elif len(pages) > 0 and not args.synonym:
                     # If any definition was found enter the print pages loop
                     cont = print_pages(pages, source["domain"], n + 1, len(links))
                 else:
