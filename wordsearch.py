@@ -114,20 +114,29 @@ def a_parse():
     """Parse commandline arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("query", help="Word you need defined")
+    parser.add_argument("-s", "--synonym", help="Look up synonyms",
+                        default=False)
     return parser.parse_args()
 
 
-def parse_hits(hits, config):
+def parse_hits(hits, config, synonym=False):
     """Parse a list of links returning all those with a known selector as a
     dictionary with url, css selector, domain"""
     valid_hits = []
     for hit in hits:
         domain = get_domain(hit)
         if domain in config:
-            context = {"url": hit,
-                       "selector": config[domain]["selector"],
-                       "domain": domain}
-            valid_hits.append(context)
+            if config[domain]["syn"] == "false" and not synonym:
+                context = {"url": hit,
+                           "selector": config[domain]["selector"],
+                           "domain": domain}
+                valid_hits.append(context)
+            elif config[domain]["syn"] == "true" and synonym:
+                context = {"url": hit,
+                           "selector": config[domain]["selector"],
+                           "domain": domain}
+                valid_hits.append(context)
+    print("Valid hits: ", valid_hits)
     return valid_hits
 
 
