@@ -116,14 +116,46 @@ def print_pages(pages, source, n, n_sources):
     return True
 
 
-def print_list(list, source, word, place, total):
+def create_list(word_list, columns, divider="- ", space=4):
+    """Convert at list of words to a neatly formatted string"""
+    max_width = 0
+    # Find the width of the largest element in the word_list + the divider
+    for entry in word_list:
+        entry = entry.strip("\n")
+        total_length = len(entry) + len(divider)
+        if total_length > max_width:
+            max_width = total_length
+
+    string_list = []
+
+    for entry in word_list:
+        list_element = ""
+        list_element += divider + entry
+        while len(list_element) < max_width:
+            list_element += " "
+        string_list.append(list_element)
+
+    return_string = ""
+    for i, entry in enumerate(string_list):
+        return_string += entry + " "*space
+        if i % columns == 0:
+            return_string += "\n"
+
+    return return_string
+
+
+def print_list(elements, source, word, place, total):
+    """Print a list of scraped definitions"""
     clear_screen()
     print("Synonyms for " + word)
     print("Source {}/{}: {}".format(place, total, source))
-    for item in list:
-        print("- " + item)
-    input("Create menu here")
-    return True
+    print(create_list(elements, 4))
+
+    u_input = input("\ne: end script\n")
+    if u_input == "e":
+        return False
+    else:
+        return True
 
 
 def a_parse():
