@@ -116,15 +116,20 @@ def print_pages(pages, source, n, n_sources):
     return True
 
 
-def create_list(word_list, columns, divider="- ", space=4):
+def create_list(word_list, divider="- ", space=4):
     """Convert at list of words to a neatly formatted string"""
     max_width = 0
     # Find the width of the largest element in the word_list + the divider
     for entry in word_list:
-        entry = entry.strip("\n")
+        entry = entry.strip("\n").strip("\t").strip(" ")
         total_length = len(entry) + len(divider)
         if total_length > max_width:
             max_width = total_length
+
+    if max_width > 15:
+        columns = 3
+    else:
+        columns = 4
 
     string_list = []
 
@@ -149,7 +154,7 @@ def print_list(elements, source, word, place, total):
     clear_screen()
     print("Synonyms for " + word)
     print("Source {}/{}: {}".format(place, total, source))
-    print(create_list(elements, 4))
+    print(create_list(elements))
 
     u_input = input("\ne: end script\n")
     if u_input == "e":
