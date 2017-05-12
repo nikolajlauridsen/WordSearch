@@ -136,7 +136,7 @@ def create_list(word_list, columns, divider="- ", space=4):
         string_list.append(list_element)
 
     return_string = ""
-    for i, entry in enumerate(string_list):
+    for i, entry in enumerate(string_list, start=1):
         return_string += entry + " "*space
         if i % columns == 0:
             return_string += "\n"
