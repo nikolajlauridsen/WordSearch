@@ -152,9 +152,9 @@ def create_list(word_list, divider="- ", space=4):
 def print_list(elements, source, word, place, total):
     """Print a list of scraped definitions"""
     clear_screen()
-    print("Synonyms for " + word)
-    print("Source {}/{}: {}".format(place, total, source))
     print(create_list(elements))
+    print("\nSynonyms for " + word)
+    print("Source {}/{}: {}".format(place, total, source))
 
     u_input = input("\ne: end script\n")
     if u_input == "e":
@@ -167,7 +167,7 @@ def a_parse():
     """Parse commandline arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("query", help="Word you need defined")
-    parser.add_argument("--synonym", "-s", help="Look up synonyms",
+    parser.add_argument("-s", "--synonym", help="Look up synonyms",
                         action="store_true", default=False)
     return parser.parse_args()
 
