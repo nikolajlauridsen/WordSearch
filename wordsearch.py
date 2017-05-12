@@ -43,9 +43,14 @@ def get_domain(link):
     return link.split('/')[0]
 
 
-def search_google(query):
+def search_google(args):
     """Search google, parse the html and return all result links as a list"""
-    payload = {'q': query, 'num':'25'}
+    if args.synonym:
+        query = args.query + " synonyms"
+    else:
+        query = "define " + args.query
+
+    payload = {'q': query, 'num': '25'}
     try:
         res = requests.get('https://www.google.dk/search?', params=payload)
         res.raise_for_status()
@@ -107,27 +112,83 @@ def print_pages(pages, source, n, n_sources):
                     return True
         else:
             page_n += 1
+    print(pages)
     return True
+
+
+def create_list(word_list, divider="- ", space=4):
+    """Convert at list of words to a neatly formatted string"""
+    max_width = 0
+    # Find the width of the largest element in the word_list + the divider
+    for entry in word_list:
+        entry = entry.strip("\n").strip("\t").strip(" ")
+        total_length = len(entry) + len(divider)
+        if total_length > max_width:
+            max_width = total_length
+
+    if max_width > 15:
+        columns = 3
+    else:
+        columns = 4
+
+    string_list = []
+
+    for entry in word_list:
+        list_element = ""
+        list_element += divider + entry
+        while len(list_element) < max_width:
+            list_element += " "
+        string_list.append(list_element)
+
+    return_string = ""
+    for i, entry in enumerate(string_list, start=1):
+        return_string += entry + " "*space
+        if i % columns == 0:
+            return_string += "\n"
+
+    return return_string
+
+
+def print_list(elements, source, word, place, total):
+    """Print a list of scraped definitions"""
+    clear_screen()
+    print(create_list(elements))
+    print("\nSynonyms for " + word)
+    print("Source {}/{}: {}".format(place, total, source))
+
+    u_input = input("\ne: end script\n")
+    if u_input == "e":
+        return False
+    else:
+        return True
 
 
 def a_parse():
     """Parse commandline arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument("query", help="Word you need defined")
+    parser.add_argument("-s", "--synonym", help="Look up synonyms",
+                        action="store_true", default=False)
     return parser.parse_args()
 
 
-def parse_hits(hits, config):
+def parse_hits(hits, config, synonym=False):
     """Parse a list of links returning all those with a known selector as a
     dictionary with url, css selector, domain"""
     valid_hits = []
     for hit in hits:
         domain = get_domain(hit)
         if domain in config:
-            context = {"url": hit,
-                       "selector": config[domain]["selector"],
-                       "domain": domain}
-            valid_hits.append(context)
+            if config[domain]["syn"] == "false" and not synonym:
+                context = {"url": hit,
+                           "selector": config[domain]["selector"],
+                           "domain": domain}
+                valid_hits.append(context)
+            elif config[domain]["syn"] == "true" and synonym:
+                context = {"url": hit,
+                           "selector": config[domain]["selector"],
+                           "domain": domain}
+                valid_hits.append(context)
     return valid_hits
 
 
@@ -137,8 +198,9 @@ def main():
     args = a_parse()
 
     print('Googling that for you...')
-    links = search_google(args.query)  # Search google and extract result links
-    links = parse_hits(links, config)  # Sort out all domains not in config.ini
+    links = search_google(args)  # Search google and extract result links
+    # Sort out all domains not in config.ini
+    links = parse_hits(links, config, synonym=args.synonym)
 
     if len(links) < 1:
         sys.exit('No definition found')
@@ -152,7 +214,9 @@ def main():
                 # Request site and extract word definiton from it using
                 # the selector in config.ini, one definition element is a pages
                 pages = parse_site(source["url"], source["selector"])
-                if len(pages) > 0:
+                if len(pages) > 0 and args.synonym:
+                    cont = print_list(pages, source["domain"], args.query, n+1, len(links))
+                elif len(pages) > 0 and not args.synonym:
                     # If any definition was found enter the print pages loop
                     cont = print_pages(pages, source["domain"], n + 1, len(links))
                 else:
