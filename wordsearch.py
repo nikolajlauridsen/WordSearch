@@ -193,14 +193,15 @@ def parse_hits(hits, config, synonym=False):
 
 
 def main():
+    # Read config and commandline args
     config = configparser.ConfigParser()
     config.read('config.ini')
     args = a_parse()
 
     print('Googling that for you...')
-    links = search_google(args)  # Search google and extract result links
+    # Search google and extract result links
     # Sort out all domains not in config.ini
-    links = parse_hits(links, config, synonym=args.synonym)
+    links = parse_hits(search_google(args), config, synonym=args.synonym)
 
     if len(links) < 1:
         sys.exit('No definition found')
@@ -215,15 +216,17 @@ def main():
                 # the selector in config.ini, one definition element is a pages
                 pages = parse_site(source["url"], source["selector"])
                 if len(pages) > 0 and args.synonym:
-                    cont = print_list(pages, source["domain"], args.query, n+1, len(links))
+                    cont = print_list(pages, source["domain"], args.query,
+                                      n + 1, len(links))
                 elif len(pages) > 0 and not args.synonym:
                     # If any definition was found enter the print pages loop
-                    cont = print_pages(pages, source["domain"], n + 1, len(links))
-                else:
+                    cont = print_pages(pages, source["domain"],
+                                       n + 1, len(links))
+                else:  # Source depleted, fetch next source if any
                     continue
-            else:
+            else:  # User stopped the script
                 break
-        else:
+        else:  # Wrong language, fetch next source if any
             continue
 
 if __name__ == '__main__':
