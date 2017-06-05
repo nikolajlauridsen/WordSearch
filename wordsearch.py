@@ -15,15 +15,18 @@ def parse_site(url, selection):
         res.raise_for_status()
     except:
         print('Can\'t connect to source')
-        return []
+        return {"encoding": "NA",
+                "content": []}
 
     site = bs4.BeautifulSoup(res.text, 'html.parser')
     content = site.select(selection)
 
     if type(content) == list:
-        elements = [item.text for item in content]
+        elements = {"encoding": res.encoding,
+                    "content": [item.text for item in content]}
     else:
-        elements = [content.text]
+        elements = {"encoding": res.encoding,
+                    "content": [content.text]}
     return elements
 
 
@@ -76,43 +79,36 @@ def print_pages(pages, source, n, n_sources):
     each paragraph has been displayed, returns true/false determining whether
     the next source should be displayed if any"""
     page_n = 0
-    back = False
-    while page_n < len(pages):
-        if len(pages[page_n]) > 10:  # Skip overly short pages
+    while page_n < len(pages["content"]):
+        if len(pages["content"][page_n]) > 10:  # Skip overly short pages
+            clear_screen()
             try:
-                clear_screen()
-                print('{}\n'.format(pages[page_n]))
-                print('Page: {}/{}'.format(page_n + 1, len(pages)))
-                print('Source {}/{}: {}'.format(n, n_sources, source))
+                print('{}\n'.format(pages["content"][page_n]))
             except UnicodeEncodeError:
-                # sometimes the encoding isn't as we'd like, this can be
-                # circumvented with .encode('utf-8') but the output is rarely
-                # pretty, so we'll skip it instead, relying on multiple sources
-                if back:
-                    page_n -= 1
-                else:
-                    page_n += 1
-                continue
+                print('{}\n'.format(
+                    str(pages["content"][page_n].encode(pages["encoding"],
+                                                        "replace"))))
+
+            print('Page: {}/{}'.format(page_n + 1, len(pages["content"])))
+            print('Source {}/{}: {}'.format(n, n_sources, source))
+
             u_input = input('\ne: end script | n: next source | b: back\n:> ')
             if u_input.lower() == 'e':
                 return False
             if u_input.lower() == 'n':
                 return True
             elif u_input.lower() == 'b':
-                back = True
                 if page_n > 0:
                     page_n -= 1
                 else:
                     page_n = 0
             else:
-                back = False
-                if page_n < len(pages)-1:
+                if page_n < len(pages["content"])-1:
                     page_n += 1
                 else:
                     return True
         else:
             page_n += 1
-    print(pages)
     return True
 
 
@@ -120,7 +116,7 @@ def create_list(word_list, divider="- ", space=4):
     """Convert at list of words to a neatly formatted string"""
     max_width = 0
     # Find the width of the largest element in the word_list + the divider
-    for entry in word_list:
+    for entry in word_list["content"]:
         entry = entry.strip("\n").strip("\t").strip(" ")
         total_length = len(entry) + len(divider)
         if total_length > max_width:
@@ -133,7 +129,7 @@ def create_list(word_list, divider="- ", space=4):
 
     string_list = []
 
-    for entry in word_list:
+    for entry in word_list["content"]:
         list_element = ""
         list_element += divider + entry
         while len(list_element) < max_width:
@@ -152,7 +148,12 @@ def create_list(word_list, divider="- ", space=4):
 def print_list(elements, source, word, place, total):
     """Print a list of scraped definitions"""
     clear_screen()
-    print(create_list(elements))
+    try:
+        print(create_list(elements))
+    except UnicodeEncodeError:
+        print(str(create_list(elements).encode(elements["encoding"],
+                                               'replace')))
+
     print("\nSynonyms for " + word)
     print("Source {}/{}: {}".format(place, total, source))
 
