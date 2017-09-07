@@ -54,6 +54,13 @@ selector = p
 lang = en
 ```
 
+# Output looking weird?
+Change your consoles encoding to UTF-8 and it should be solved.
+On windows you can change your encoding with the following command:
+```
+chcp 65001
+```
+
 # Requirements
 You can install requirements with pip
 ```
